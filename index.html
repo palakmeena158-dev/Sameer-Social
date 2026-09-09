@@ -1,0 +1,300 @@
+<!doctype html>
+<html lang="hi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Sameer Social</title>
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;background:#f5f5f5;color:#222}.wrap{max-width:600px;margin:auto;padding-bottom:80px}
+header{position:sticky;top:0;background:#fff;border-bottom:1px solid #ddd;padding:14px 16px;display:flex;justify-content:space-between;align-items:center;z-index:5}.logo{font-size:22px;font-weight:800}
+.card{background:#fff;margin:12px 0;border:1px solid #ddd;border-radius:12px;overflow:hidden}.pad{padding:16px}.field{width:100%;padding:11px;border:1px solid #ccc;border-radius:8px;margin:6px 0 10px;font-size:16px}button{cursor:pointer}.primary{background:#111;color:#fff;border:0;border-radius:8px;padding:11px 16px;font-weight:700}.secondary{background:#eee;color:#111;border:0;border-radius:8px;padding:10px 14px}.danger{background:#fee;color:#a00;border:0;border-radius:8px;padding:10px 14px}
+.tabs{display:flex;border-bottom:1px solid #ddd;background:#fff}.tabs button{flex:1;border:0;background:#fff;padding:13px;font-weight:700}.tabs .active{border-bottom:3px solid #111}.posthead{padding:12px;font-weight:700}.postimg{width:100%;display:block;max-height:520px;object-fit:cover}.actions{padding:10px 12px;display:flex;gap:16px}.actions button{border:0;background:none;font-size:16px}.caption{padding:0 12px 14px}.empty{padding:30px;text-align:center;color:#777}
+.person{display:flex;align-items:center;gap:12px;padding:12px;border-bottom:1px solid #eee}.avatar{width:48px;height:48px;border-radius:50%;background:#ddd;display:flex;align-items:center;justify-content:center;font-size:25px;overflow:hidden}.avatar img{width:100%;height:100%;object-fit:cover}.person .info{flex:1}.small{font-size:13px;color:#777}.profileTop{text-align:center;padding:22px}.profileAvatar{width:85px;height:85px;margin:auto;border-radius:50%;background:#ddd;display:flex;align-items:center;justify-content:center;font-size:40px;overflow:hidden}.profileAvatar img{width:100%;height:100%;object-fit:cover}.stats{display:flex;justify-content:center;gap:35px;margin:15px 0}.stats b{display:block;font-size:18px}.hidden{display:none!important}nav{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid #ddd;display:flex;justify-content:space-around;padding:10px;z-index:5}nav button{border:0;background:none;font-size:14px}.note{font-size:13px;color:#666;line-height:1.5}.status{padding:10px 12px;text-align:center;font-size:14px}.status.ok{color:#176b2c}.status.err{color:#a00}
+</style>
+</head>
+<body>
+<header><div class="logo">Sameer Social</div><div id="headUser">👤</div></header>
+<div class="wrap">
+
+<section id="auth" class="card pad">
+  <h2 id="authTitle">Sameer Social में आपका स्वागत है 👋</h2>
+  <p id="authSub">नई ID बनाइए और लोगों से जुड़िए।</p>
+  <input id="name" class="field" placeholder="पूरा नाम">
+  <input id="username" class="field" placeholder="Username (जैसे sameer123)">
+  <input id="email" type="email" class="field" placeholder="Email">
+  <input id="password" type="password" class="field" placeholder="Password">
+  <button class="primary" onclick="signup()">नई ID बनाएं</button>
+  <button class="secondary" style="margin-left:6px" onclick="login()">Login</button>
+  <div id="authStatus" class="status"></div>
+  <p class="note">यह version Supabase से online users, posts, likes और follows के लिए जुड़ा है।</p>
+</section>
+
+<div id="app" class="hidden">
+<section id="home">
+  <div class="card composer pad">
+    <b>नई पोस्ट</b>
+    <textarea id="text" class="field" rows="3" placeholder="आप क्या सोच रहे हैं?"></textarea>
+    <input id="photo" type="file" accept="image/*">
+    <br><button class="primary" onclick="addPost()">Post करें</button>
+  </div>
+  <div id="feed"></div>
+</section>
+
+<section id="people" class="hidden">
+  <div class="card pad"><h3>🔍 लोग खोजें</h3><input id="search" class="field" oninput="renderPeople()" placeholder="नाम या username खोजें"></div>
+  <div class="card" id="peopleList"></div>
+</section>
+
+<section id="profile" class="hidden">
+  <div class="card profileTop">
+    <div id="myAvatar" class="profileAvatar">👤</div>
+    <h2 id="myName"></h2><div id="myUsername" class="small"></div>
+    <p>Sameer Social पर आपका प्रोफाइल</p>
+    <div class="stats">
+      <div><b id="postCount">0</b>Posts</div>
+      <div><b id="followersCount">0</b>Followers</div>
+      <div><b id="followingCount">0</b>Following</div>
+    </div>
+    <button class="danger" onclick="logout()">Logout</button>
+  </div>
+</section>
+</div></div>
+
+<nav id="nav" class="hidden">
+  <button onclick="show('home')">🏠 Home</button>
+  <button onclick="show('people')">🔍 People</button>
+  <button onclick="focusPost()">➕ Post</button>
+  <button onclick="show('profile')">👤 Profile</button>
+</nav>
+
+<script>
+/* ===== Sameer Social Supabase configuration =====
+   Put your Supabase Publishable key in the line below.
+   NEVER put a secret/service_role key here. */
+const SUPABASE_URL = 'https://pmjqocqyftdqdijvjliv.supabase.co';
+const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_DKFkilKkuNouZOywggvzqA_6HvgGkmH';
+
+let session = null;
+let me = null;
+let users = [];
+let posts = [];
+let follows = [];
+let likes = [];
+
+function headers(token) {
+  return {
+    'apikey': SUPABASE_PUBLISHABLE_KEY,
+    'Authorization': 'Bearer ' + (token || SUPABASE_PUBLISHABLE_KEY),
+    'Content-Type': 'application/json',
+    'Prefer': 'return=representation'
+  };
+}
+function api(path, options={}) {
+  if (SUPABASE_PUBLISHABLE_KEY === 'sb_publishable_DKFkilKkuNouZOywggvzqA_6HvgGkmH')
+    return Promise.reject(new Error('पहले index.html में Supabase Publishable key डालें।'));
+  return fetch(SUPABASE_URL + path, {
+    ...options,
+    headers: {...headers(session?.access_token), ...(options.headers||{})}
+  }).then(async r => {
+    const text = await r.text();
+    let data = null; try { data = text ? JSON.parse(text) : null; } catch(e) {}
+    if (!r.ok) throw new Error(data?.message || data?.error_description || text || ('HTTP '+r.status));
+    return data;
+  });
+}
+function authRequest(path, body) {
+  if (SUPABASE_PUBLISHABLE_KEY === 'sb_publishable_DKFkilKkuNouZOywggvzqA_6HvgGkmH')
+    return Promise.reject(new Error('पहले index.html में Supabase Publishable key डालें।'));
+  return fetch(SUPABASE_URL + '/auth/v1/' + path, {
+    method:'POST',
+    headers: {'apikey':SUPABASE_PUBLISHABLE_KEY,'Content-Type':'application/json'},
+    body: JSON.stringify(body)
+  }).then(async r=>{
+    const text=await r.text(); let data=null; try{data=text?JSON.parse(text):null}catch(e){}
+    if(!r.ok) throw new Error(data?.msg || data?.message || data?.error_description || text || ('HTTP '+r.status));
+    return data;
+  });
+}
+function setStatus(msg, ok=false) {
+  const el=document.getElementById('authStatus'); if(el){el.textContent=msg;el.className='status '+(ok?'ok':'err');}
+}
+function escapeHtml(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));}
+
+async function signup(){
+  const name=document.getElementById('name').value.trim();
+  const username=document.getElementById('username').value.trim().toLowerCase().replace(/\s/g,'');
+  const email=document.getElementById('email').value.trim().toLowerCase();
+  const password=document.getElementById('password').value;
+  if(!name||!username||!email||!password)return setStatus('नाम, username, email और password भरें।');
+  try{
+    setStatus('Account बनाया जा रहा है…',true);
+    const data=await authRequest('signup',{email,password,data:{name,username}});
+    if(data.session){
+      session=data.session;
+      localStorage.setItem('sameer_session',JSON.stringify(session));
+      await ensureProfile(name,username);
+      await enter();
+    } else {
+      setStatus('Account बन गया। अगर email confirmation चालू है तो email verify करके Login करें।',true);
+    }
+  }catch(e){setStatus(e.message);}
+}
+async function login(){
+  const email=document.getElementById('email').value.trim().toLowerCase();
+  const password=document.getElementById('password').value;
+  if(!email||!password)return setStatus('Email और password भरें।');
+  try{
+    setStatus('Login हो रहा है…',true);
+    const data=await authRequest('token?grant_type=password',{email,password});
+    session=data;
+    localStorage.setItem('sameer_session',JSON.stringify(session));
+    await loadMe();
+    await enter();
+  }catch(e){setStatus(e.message);}
+}
+async function ensureProfile(name,username){
+  const rows=await api('/rest/v1/profiles?select=*&id=eq.'+encodeURIComponent(session.user.id));
+  if(!rows.length){
+    await api('/rest/v1/profiles',{method:'POST',body:JSON.stringify({id:session.user.id,name,username})});
+  }
+}
+async function loadMe(){
+  const rows=await api('/rest/v1/profiles?select=*&id=eq.'+encodeURIComponent(session.user.id));
+  if(!rows.length){
+    const meta=session.user.user_metadata||{};
+    await ensureProfile(meta.name||'User',meta.username||('user'+Date.now()));
+    return loadMe();
+  }
+  me=rows[0];
+}
+async function enter(){
+  document.getElementById('auth').classList.add('hidden');
+  document.getElementById('app').classList.remove('hidden');
+  document.getElementById('nav').classList.remove('hidden');
+  await renderAll();
+}
+async function logout(){
+  try{
+    await fetch(SUPABASE_URL+'/auth/v1/logout',{method:'POST',headers:{'apikey':SUPABASE_PUBLISHABLE_KEY,'Authorization':'Bearer '+session.access_token}});
+  }catch(e){}
+  session=null;localStorage.removeItem('sameer_session');me=null;users=[];posts=[];follows=[];likes=[];
+  document.getElementById('auth').classList.remove('hidden');
+  document.getElementById('app').classList.add('hidden');
+  document.getElementById('nav').classList.add('hidden');
+  setStatus('Logout हो गया।',true);
+}
+async function renderAll(){
+  if(!me) await loadMe();
+  document.getElementById('headUser').textContent='@'+me.username;
+  document.getElementById('myName').textContent=me.name;
+  document.getElementById('myUsername').textContent='@'+me.username;
+  await Promise.all([loadUsers(),loadPosts(),loadFollows(),loadLikes()]);
+  renderFeed(); renderPeople(); await renderStats();
+}
+async function loadUsers(){
+  users=await api('/rest/v1/profiles?select=id,name,username,avatar_url&order=created_at.desc');
+}
+async function loadPosts(){
+  posts=await api('/rest/v1/posts?select=id,user_id,text,image_url,created_at&order=created_at.desc');
+}
+async function loadFollows(){
+  follows=await api('/rest/v1/follows?select=follower_id,following_id');
+}
+async function loadLikes(){
+  likes=await api('/rest/v1/likes?select=user_id,post_id');
+}
+function followingIds(){return follows.filter(x=>x.follower_id===me.id).map(x=>x.following_id);}
+function renderFeed(){
+  const visible=posts.filter(p=>p.user_id===me.id||followingIds().includes(p.user_id));
+  const f=document.getElementById('feed');
+  if(!visible.length){f.innerHTML='<div class="card empty">अभी feed खाली है। People में जाकर किसी को Follow करें या पहली पोस्ट डालें! 🎉</div>';return;}
+  f.innerHTML=visible.map(p=>{
+    const author=users.find(x=>x.id===p.user_id)||{name:'User',username:'user'};
+    const count=likes.filter(x=>x.post_id===p.id).length;
+    const liked=likes.some(x=>x.post_id===p.id&&x.user_id===me.id);
+    return `<div class="card">
+      <div class="posthead">👤 ${escapeHtml(author.name)} <span class="small">@${escapeHtml(author.username)}</span></div>
+      ${p.image_url?`<img class="postimg" src="${escapeHtml(p.image_url)}">`:''}
+      <div class="actions">
+        <button onclick="toggleLike('${p.id}')">${liked?'❤️':'🤍'} ${count}</button>
+        <button onclick="sharePost('${p.id}')">↗ Share</button>
+      </div>
+      <div class="caption">${escapeHtml(p.text||'')}</div>
+    </div>`;
+  }).join('');
+}
+function renderPeople(){
+  const q=(document.getElementById('search')?.value||'').toLowerCase();
+  const ids=followingIds();
+  const arr=users.filter(x=>x.id!==me.id&&(x.name.toLowerCase().includes(q)||x.username.toLowerCase().includes(q)));
+  const box=document.getElementById('peopleList');
+  if(!arr.length){box.innerHTML='<div class="empty">कोई दूसरा user नहीं मिला।</div>';return;}
+  box.innerHTML=arr.map(x=>{
+    const following=ids.includes(x.id);
+    const followerCount=follows.filter(f=>f.following_id===x.id).length;
+    return `<div class="person"><div class="avatar">👤</div><div class="info"><b>${escapeHtml(x.name)}</b><div class="small">@${escapeHtml(x.username)} · ${followerCount} followers</div></div><button class="${following?'secondary':'primary'}" onclick="toggleFollow('${x.id}')">${following?'Following':'Follow'}</button></div>`;
+  }).join('');
+}
+async function toggleFollow(id){
+  try{
+    const existing=follows.find(x=>x.follower_id===me.id&&x.following_id===id);
+    if(existing){
+      await api('/rest/v1/follows?follower_id=eq.'+encodeURIComponent(me.id)+'&following_id=eq.'+encodeURIComponent(id),{method:'DELETE'});
+    }else{
+      await api('/rest/v1/follows',{method:'POST',body:JSON.stringify({follower_id:me.id,following_id:id})});
+    }
+    await loadFollows(); renderPeople(); renderFeed(); await renderStats();
+  }catch(e){alert(e.message);}
+}
+async function toggleLike(id){
+  try{
+    const existing=likes.find(x=>x.user_id===me.id&&x.post_id===id);
+    if(existing){
+      await api('/rest/v1/likes?user_id=eq.'+encodeURIComponent(me.id)+'&post_id=eq.'+encodeURIComponent(id),{method:'DELETE'});
+    }else{
+      await api('/rest/v1/likes',{method:'POST',body:JSON.stringify({user_id:me.id,post_id:id})});
+    }
+    await loadLikes(); renderFeed();
+  }catch(e){alert(e.message);}
+}
+async function addPost(){
+  const text=document.getElementById('text').value.trim();
+  const file=document.getElementById('photo').files[0];
+  if(!text&&!file)return alert('पहले कुछ लिखें या फोटो चुनें');
+  try{
+    let image_url=null;
+    if(file){
+      // Simple prototype upload: stores a data URL in the post row.
+      // For large photos, use Supabase Storage in a later step.
+      image_url=await readAsDataURL(file);
+    }
+    await api('/rest/v1/posts',{method:'POST',body:JSON.stringify({user_id:me.id,text:text||null,image_url})});
+    document.getElementById('text').value='';document.getElementById('photo').value='';
+    await loadPosts();renderFeed();await renderStats();show('home');
+  }catch(e){alert(e.message);}
+}
+function readAsDataURL(file){return new Promise((resolve,reject)=>{const r=new FileReader();r.onload=()=>resolve(r.result);r.onerror=reject;r.readAsDataURL(file);});}
+async function renderStats(){
+  document.getElementById('postCount').textContent=posts.filter(p=>p.user_id===me.id).length;
+  document.getElementById('followersCount').textContent=follows.filter(f=>f.following_id===me.id).length;
+  document.getElementById('followingCount').textContent=follows.filter(f=>f.follower_id===me.id).length;
+}
+function sharePost(id){
+  const text='Sameer Social पर पोस्ट देखें';
+  if(navigator.share)navigator.share({title:'Sameer Social',text}).catch(()=>{});
+  else alert(text);
+}
+function show(x){
+  ['home','people','profile'].forEach(id=>document.getElementById(id).classList.toggle('hidden',id!==x));
+  if(x==='people')renderPeople(); if(x==='profile')renderStats(); window.scrollTo(0,0);
+}
+function focusPost(){show('home');setTimeout(()=>document.getElementById('text').focus(),50);}
+
+(async function(){
+  if(SUPABASE_PUBLISHABLE_KEY==='sb_publishable_DKFkilKkuNouZOywggvzqA_6HvgGkmH') return;
+  const saved=localStorage.getItem('sameer_session');
+  if(saved){try{session=JSON.parse(saved);await loadMe();await enter();}catch(e){localStorage.removeItem('sameer_session');session=null;}}
+})();
+</script>
+</body>
+</html>

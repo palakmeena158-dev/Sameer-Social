@@ -1,0 +1,9 @@
+Sameer Social - Supabase setup
+
+1. Open app/src/main/assets/index.html.
+2. Find:
+   const SUPABASE_PUBLISHABLE_KEY = 'PASTE_YOUR_PUBLISHABLE_KEY_HERE';
+3. Replace only the placeholder with the project's Publishable key from Supabase Project Settings > API Keys.
+4. Do NOT use a secret/service_role key.
+5. The Supabase project URL is already configured.
+6. The database SQL from the earlier step must already have been run.
