@@ -15,8 +15,8 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Extract Android project
-        run: |
-          unzip -q SameerSocialAndroid_GitHubProject.zip -d android-project
+       run: 
+          unzip -q SameerSocial_Instagram_Design_Ready.zip -d android-project
 
       - name: Set up Java 17
         uses: actions/setup-java@v4
