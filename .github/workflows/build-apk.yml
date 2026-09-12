@@ -16,18 +16,25 @@ jobs:
 
       - name: Extract Android project
         run: |
-          unzip -q SameerSocial_Instagram_Design_Ready.zip -d android-project
+          ZIP_FILE=$(find . -maxdepth 1 -type f -name "*.zip" | head -n 1)
+          unzip -q "$ZIP_FILE" -d android-project
+
+      - name: Use latest web design
+        run: |
+          if [ -f index.html ]; then
+            cp index.html android-project/app/src/main/assets/index.html
+          fi
 
       - name: Set up Java 17
         uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: '17'
+          java-version: "17"
 
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
         with:
-          gradle-version: '8.7'
+          gradle-version: "8.7"
 
       - name: Build APK
         working-directory: android-project
