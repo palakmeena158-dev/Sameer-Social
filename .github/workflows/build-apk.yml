@@ -14,10 +14,14 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Extract Android project
+            - name: Extract Android project
         run: |
-          ZIP_FILE=$(find . -maxdepth 1 -type f -name "*.zip" | head -n 1)
+          ZIP_FILE="SameerSocial_Instagram_Features_Added.zip"
           unzip -q "$ZIP_FILE" -d android-project
+      
+        
+        
+
 
       - name: Use latest web design
         run: |
