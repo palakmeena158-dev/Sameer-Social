@@ -14,20 +14,42 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Extract Android project
+      - name: Find Android project
+        shell: bash
         run: |
-          ZIP_FILE=$(find . -maxdepth 1 -type f -name 'SameerSocial_Instagram*.zip' | head -n 1)
-          mkdir -p android-project
-          unzip -q "$ZIP_FILE" -d android-project
-      
-        
-        
+          set -e
 
+          if [ -d "app/src/main" ]; then
+            PROJECT_DIR="."
+          else
+            ZIP_FILE=$(find . -maxdepth 1 -type f -name "*.zip" ! -iname "*debug-apk*" | head -n 1)
+
+            if [ -z "$ZIP_FILE" ]; then
+              echo "Android project or project ZIP was not found."
+              exit 1
+            fi
+
+            mkdir -p android-project
+            unzip -q "$ZIP_FILE" -d android-project
+
+            PROJECT_DIR=$(find android-project -type d -path "*/app/src/main" | head -n 1 | sed 's#/app/src/main##')
+
+            if [ -z "$PROJECT_DIR" ]; then
+              echo "The ZIP does not contain a valid Android project."
+              exit 1
+            fi
+          fi
+
+          echo "PROJECT_DIR=$PROJECT_DIR" >> "$GITHUB_ENV"
 
       - name: Use latest web design
+        shell: bash
         run: |
-          if [ -f index.html ]; then
-            cp index.html android-project/app/src/main/assets/index.html
+          set -e
+
+          if [ -f "index.html" ]; then
+            mkdir -p "$PROJECT_DIR/app/src/main/assets"
+            cp "index.html" "$PROJECT_DIR/app/src/main/assets/index.html"
           fi
 
       - name: Set up Java 17
@@ -42,11 +64,12 @@ jobs:
           gradle-version: "8.7"
 
       - name: Build APK
-        working-directory: android-project
+        working-directory: ${{ env.PROJECT_DIR }}
         run: gradle --no-daemon assembleDebug
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: SameerSocial-debug-apk
-          path: android-project/app/build/outputs/apk/debug/app-debug.apk
+          path: ${{ env.PROJECT_DIR }}/app/build/outputs/apk/debug/app-debug.apk
+          
