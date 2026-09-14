@@ -17,7 +17,9 @@ jobs:
       - name: Extract Android project
         run: |
           unzip -q SameerSocial_Instagram_Design_Ready.zip -d android-project
-
+      - name: Use latest index.html
+        run: |
+              cp index.html android-project/app/src/main/assets/index.html
       - name: Set up Java 17
         uses: actions/setup-java@v4
         with:
