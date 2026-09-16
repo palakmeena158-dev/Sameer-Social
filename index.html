@@ -5,74 +5,56 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Sameer Social</title>
 <style>
+:root{--bg:#070b18;--panel:#10172b;--line:#273252;--text:#f7f8ff;--muted:#9ca9c8;--a:#7c6cff}
 *{box-sizing:border-box}
+html,body{margin:0;background:radial-gradient(circle at top,#17204a,#070b18 48%,#050711);color:var(--text);font-family:Arial,sans-serif}
+.hidden{display:none!important}
+.app{width:min(100%,560px);margin:auto;min-height:100vh;padding:12px 12px 92px}
+header{position:sticky;top:0;z-index:5;display:flex;align-items:center;justify-content:space-between;padding:15px 4px;margin-bottom:12px;background:rgba(7,11,24,.94);border-bottom:1px solid var(--line)}
+.logo{font-size:24px;font-weight:900;background:linear-gradient(90deg,#fff,#9e9aff,#48dcff);-webkit-background-clip:text;background-clip:text;color:transparent}
+.icon{font-size:22px;color:white}
+.card{background:linear-gradient(145deg,#151e36,#0c1223);border:1px solid var(--line);border-radius:22px;box-shadow:0 12px 30px #0003;margin:12px 0;overflow:hidden}
+.pad{padding:18px}
+h1,h2,h3,p{color:var(--text)}
+.small,.note,.status{color:var(--muted);font-size:13px}
+input,textarea{width:100%;background:#080e20!important;color:white!important;border:1px solid #344263!important;border-radius:14px!important;padding:13px!important;margin:6px 0}
+button{border:0;border-radius:13px;padding:11px 14px;font-weight:700}
+button.primary,.primary{background:linear-gradient(135deg,#7c6cff,#4a9dff)!important;color:white!important}
+button.secondary,.secondary{background:#202c4b!important;color:#dce5ff!important}
+button.danger,.danger{background:#7d284b!important;color:white!important}
+.composer{padding:16px}
+#feed .card{padding:0}
+.posthead{padding:15px 16px;font-weight:700}
+.postimg{width:100%;max-height:460px;object-fit:cover;display:block}
+.actions{display:flex;gap:8px;padding:12px 16px;border-top:1px solid var(--line)}
+.actions button{background:#202b48;color:white}
+.caption{padding:0 16px 17px;line-height:1.5;color:#e5eaff}
+.profileTop{text-align:center;padding:24px 18px}
+.profileAvatar{width:104px;height:104px;margin:0 auto 12px;border-radius:50%;display:grid;place-items:center;font-size:38px;font-weight:900;color:white;background:linear-gradient(135deg,#756bff,#1bc9ef);border:4px solid #29365d}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:20px 0}
+.stats>div{background:#0b1227;border:1px solid #263353;border-radius:15px;padding:12px 4px;color:var(--muted)}
+.stats b{display:block;color:white;font-size:21px;margin-bottom:4px}
+.person{display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid var(--line)}
+.person .avatar{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;background:linear-gradient(135deg,#7167ff,#25c9e8)}
+.person .info{flex:1;min-width:0}
+.empty{padding:24px;text-align:center;color:var(--muted)}
+#nav{position:fixed;z-index:10;bottom:10px;left:50%;transform:translateX(-50%);width:min(calc(100% - 20px),536px);display:flex;justify-content:space-around;align-items:center;padding:8px;background:#10172bf5;border:1px solid #344263;border-radius:22px}
+#nav button{background:transparent;color:#aebbd8;padding:10px 12px;font-size:13px}
+#auth{margin-top:18vh}
 
-body{
-  margin:0;
-  background:#0b0d12!important;
-  color:#f5f7ff!important;
-  font-family:Arial,sans-serif;
-}
+/* Messages / Chat */
+.list-card,.chat-panel{background:var(--card,#171b24);border:1px solid var(--border,#303746);border-radius:16px;padding:12px;margin-top:12px}
+.conversation-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px;border-bottom:1px solid var(--border,#303746);cursor:pointer}
+.conversation-row:last-child{border-bottom:0}
+.conversation-row strong{display:block}
+.muted{opacity:.7}
+.message-list{display:flex;flex-direction:column;gap:8px;max-height:360px;overflow-y:auto;padding:10px 0}
+.bubble{max-width:80%;padding:10px 12px;border-radius:15px;white-space:pre-wrap;overflow-wrap:anywhere}
+.bubble.mine{align-self:flex-end;background:#6c5ce7;color:white;border-bottom-right-radius:4px}
+.bubble.theirs{align-self:flex-start;background:#2a3140;border-bottom-left-radius:4px}
+.chat-form{display:flex;gap:8px}
+.chat-form input{flex:1;min-width:0}
 
-header,nav{
-  background:#11141c!important;
-  color:white!important;
-  border-color:#292e3b!important;
-}
-
-.card{
-  background:#151923!important;
-  color:#f5f7ff!important;
-  border:1px solid #292e3b!important;
-  border-radius:18px!important;
-}
-
-input,textarea{
-  background:#0e1118!important;
-  color:white!important;
-  border:1px solid #363d4d!important;
-  border-radius:12px!important;
-  padding:12px!important;
-}
-
-button{
-  border-radius:12px!important;
-}
-
-.post{
-  background:#151923!important;
-  border-radius:18px!important;
-  overflow:hidden;
-}
-
-a{
-  color:#9b9cff!important;
-}
-
-h1,h2,h3,p,span,div{
-  color:inherit;
-}
-
-.logo{
-  color:#9b9cff!important;
-  font-weight:bold;
-}
-
-button.primary,
-button[type="submit"]{
-  background:linear-gradient(135deg,#6475ff,#9b5cff)!important;
-  color:white!important;
-  border:0!important;
-}
-
-.tabs button{
-  background:#151923!important;
-  color:white!important;
-}
-
-nav button{
-  color:white!important;
-}
 </style>
 
 
@@ -123,6 +105,28 @@ nav button{
   </div>
 </section>
 </div></div>
+
+
+<section id="messages" class="screen" style="display:none">
+  <div class="section-head">
+    <h2>Messages</h2>
+    <button class="secondary" onclick="loadConversations()">Refresh</button>
+  </div>
+  <div id="conversationList" class="list-card">
+    <p class="muted">Loading conversations…</p>
+  </div>
+  <div id="chatPanel" class="chat-panel" style="display:none">
+    <div class="section-head">
+      <h3 id="chatTitle">Chat</h3>
+      <button class="secondary" onclick="closeChat()">Close</button>
+    </div>
+    <div id="messageList" class="message-list"></div>
+    <form onsubmit="sendMessage(event)" class="chat-form">
+      <input id="messageInput" type="text" placeholder="Type a message…" maxlength="2000" required>
+      <button type="submit">Send</button>
+    </form>
+  </div>
+</section>
 
 <nav id="nav" class="hidden">
   <button onclick="show('home')">🏠 Home</button>
@@ -249,7 +253,7 @@ async function logout(){
 }
 async function renderAll(){
   if(!me) await loadMe();
-  document.getElementById('headUser').textContent='@'+me.username;
+  const headUser=document.getElementById('headUser'); if(headUser) headUser.textContent='@'+me.username;
   document.getElementById('myName').textContent=me.name;
   document.getElementById('myUsername').textContent='@'+me.username;
   await Promise.all([loadUsers(),loadPosts(),loadFollows(),loadLikes()]);
@@ -359,6 +363,55 @@ function focusPost(){show('home');setTimeout(()=>document.getElementById('text')
   const saved=localStorage.getItem('sameer_session');
   if(saved){try{session=JSON.parse(saved);await loadMe();await enter();}catch(e){localStorage.removeItem('sameer_session');session=null;}}
 })();
+
+/* ---------- Messages / Chat backend ---------- */
+/* Required Supabase table:
+   messages(id bigint generated by default as identity primary key,
+            sender_id uuid references auth.users not null,
+            receiver_id uuid references auth.users not null,
+            body text not null,
+            created_at timestamptz default now())
+*/
+let activeChatUser = null;
+
+async function loadConversations(){
+  const box=document.getElementById('conversationList');
+  if(!box || !me) return;
+  box.innerHTML='<p class="muted">Loading conversations…</p>';
+  try{
+    const sent=await supa('messages?select=receiver_id,created_at&sender_id=eq.'+me.id+'&order=created_at.desc&limit=100');
+    const received=await supa('messages?select=sender_id,created_at&receiver_id=eq.'+me.id+'&order=created_at.desc&limit=100');
+    const ids=[...new Set([...(sent||[]).map(x=>x.receiver_id),...(received||[]).map(x=>x.sender_id)])];
+    if(!ids.length){box.innerHTML='<p class="muted">No conversations yet. Open People and message someone after adding them.</p>';return;}
+    const profiles=await supa('profiles?select=id,username,name&id=in.('+ids.join(',')+')');
+    box.innerHTML=(profiles||[]).map(p=>`<div class="conversation-row" onclick="openChat('${p.id}','${(p.name||p.username||'User').replace(/'/g,"&#39;")}')"><span><strong>${p.name||p.username||'User'}</strong><span class="muted">@${p.username||''}</span></span><span>›</span></div>`).join('');
+  }catch(e){box.innerHTML='<p class="muted">Messages table is not ready. Run the SQL setup first.</p>';console.error(e);}
+}
+
+async function openChat(userId, label){
+  activeChatUser=userId;
+  document.getElementById('chatPanel').style.display='block';
+  document.getElementById('chatTitle').textContent=label;
+  await loadChatMessages();
+}
+function closeChat(){activeChatUser=null;document.getElementById('chatPanel').style.display='none';}
+async function loadChatMessages(){
+  if(!activeChatUser || !me) return;
+  const rows=await supa('messages?select=sender_id,receiver_id,body,created_at&or=(and(sender_id.eq.'+me.id+',receiver_id.eq.'+activeChatUser+'),and(sender_id.eq.'+activeChatUser+',receiver_id.eq.'+me.id+'))&order=created_at.asc');
+  const list=document.getElementById('messageList');
+  list.innerHTML=(rows||[]).map(m=>`<div class="bubble ${m.sender_id===me.id?'mine':'theirs'}">${escapeHtml(m.body)}</div>`).join('')||'<p class="muted">Start the conversation.</p>';
+  list.scrollTop=list.scrollHeight;
+}
+async function sendMessage(event){
+  event.preventDefault();
+  if(!activeChatUser || !me) return;
+  const input=document.getElementById('messageInput');
+  const body=input.value.trim(); if(!body) return;
+  await supa('messages',{method:'POST',body:JSON.stringify({sender_id:me.id,receiver_id:activeChatUser,body}),headers:{'Prefer':'return=minimal'}});
+  input.value=''; await loadChatMessages(); await loadConversations();
+}
+function escapeHtml(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+
 </script>
 </body>
 </html>
