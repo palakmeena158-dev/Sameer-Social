@@ -157,8 +157,10 @@ function headers(token) {
     'Prefer': 'return=representation'
   };
 }
-function api(path, options={}) {
-  if (SUPABASE_PUBLISHABLE_KEY === 'sb_publishable_DKFkilKkuNouZOywggvzqA_6HvgGkmH')
+function supa(path, options={}) {
+  return api('/rest/v1/' + path, options);
+  }
+const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_DKFkilKkuNouZOywggvzqA_6HvgGkmH';
     return Promise.reject(new Error('पहले index.html में Supabase Publishable key डालें।'));
   return fetch(SUPABASE_URL + path, {
     ...options,
